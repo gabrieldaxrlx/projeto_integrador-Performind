@@ -52,7 +52,6 @@ public class ListaVideosActivity extends AppCompatActivity implements VideoAdapt
         adapter = new VideoAdapter(videos, this, this);
         recyclerView.setAdapter(adapter);
 
-
         ImageButton btnUser = findViewById(R.id.btnUser);
         btnUser.setOnClickListener(v -> {
             Intent intent = new Intent(ListaVideosActivity.this, PerfilUsuario.class);
@@ -241,11 +240,9 @@ public class ListaVideosActivity extends AppCompatActivity implements VideoAdapt
         rootView.addView(drawerLayout);
         drawerLayout.openDrawer(Gravity.START);
     }
-
     private int getScreenWidth() {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         return displayMetrics.widthPixels;
     }
 }
-
