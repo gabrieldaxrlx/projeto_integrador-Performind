@@ -1,0 +1,11 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:width="16dp"
+    android:height="16dp"
+    android:viewportWidth="16"
+    android:viewportHeight="16"
+    tools:ignore="ExtraText">
+    <path
+        android:fillColor="@color/black" /><!-- Substitua pela cor desejada -->
+
+</vector>
