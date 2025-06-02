@@ -47,18 +47,21 @@
                 android:src="@drawable/ic_notification" />
 
             <!-- SearchView -->
+
+            <!-- Menu lateral -->
+
             <SearchView
                 android:id="@+id/searchView"
                 android:layout_width="match_parent"
                 android:layout_height="36dp"
-                android:layout_centerVertical="true"
                 android:layout_marginHorizontal="8dp"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="12dp"
                 android:layout_toLeftOf="@id/btnNotificacao"
                 android:layout_toRightOf="@id/btnMenu"
                 android:iconifiedByDefault="false"
                 android:queryHint="Pesquisar..." />
 
-            <!-- Menu lateral -->
             <ImageButton
                 android:id="@+id/btnMenu"
                 android:layout_width="24dp"

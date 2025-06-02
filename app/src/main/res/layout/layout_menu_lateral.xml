@@ -60,6 +60,17 @@
             android:textSize="14sp" />
 
         <Button
+            android:id="@+id/btnExcluirUsuario"
+            style="?attr/borderlessButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="Excluir usuário"
+            android:textAllCaps="false"
+            android:textSize="14sp" />
+
+
+        <Button
             android:id="@+id/btnSair"
             style="?attr/borderlessButtonStyle"
             android:layout_width="match_parent"

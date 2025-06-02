@@ -12,23 +12,37 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TesteWebwiew"
         tools:targetApi="31">
-
+        <activity
+            android:name=".Excluir_usuario"
+            android:exported="false" />
         <activity
             android:name=".LoginActivity"
             android:exported="true"> <!-- Alterado para true -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".TelaDeUsuarios" android:exported="false" />
-        <activity android:name=".CriacaoDeConta" android:exported="false" />
-        <activity android:name=".PerfilUsuario" android:exported="false" />
-        <activity android:name=".ListaVideosActivity" android:exported="false" />
-        <activity android:name=".CadastroVideo"
+        <activity
+            android:name=".TelaDeUsuarios"
+            android:exported="false" />
+        <activity
+            android:name=".CriacaoDeConta"
+            android:exported="false" />
+        <activity
+            android:name=".PerfilUsuario"
+            android:exported="false" />
+        <activity
+            android:name=".ListaVideosActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CadastroVideo"
             android:exported="false"
             android:label="@string/title_activity_cadastro_video" />
-        <activity android:name=".MainActivity" android:exported="false" />
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
     </application>
+
 </manifest>

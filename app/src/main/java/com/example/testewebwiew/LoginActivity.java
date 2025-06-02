@@ -22,7 +22,6 @@ public class LoginActivity extends AppCompatActivity {
     private EditText editMatricula, editSenha;
     private Button btnEntrar;
 
-    // Substitua com sua URL e API KEY reais
     private static final String SUPABASE_URL = "https://czflkjinwqeokpxesucd.supabase.co";
     private static final String SUPABASE_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6Zmxramlud3Flb2tweGVzdWNkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0Nzk1Mjk3NiwiZXhwIjoyMDYzNTI4OTc2fQ.n4bNzO29sqfmHf7-FXHpX_5e6QCRMNL8JV5hitPAM8E";
 
@@ -30,8 +29,6 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
@@ -79,12 +76,11 @@ public class LoginActivity extends AppCompatActivity {
                         JSONArray jsonArray = new JSONArray(responseBody);
 
                         if (jsonArray.length() == 1) {
-                            // Extrai o JSON do usuário
                             org.json.JSONObject userObj = jsonArray.getJSONObject(0);
 
                             String nome = userObj.optString("nome", "Usuário");
                             String matricula = userObj.optString("matricula", "");
-                            String tipo = userObj.optString("tipo", ""); // Ajuste o campo conforme sua tabela
+                            String tipo = userObj.optString("tipo", ""); // Ex: "admin", "funcionario"
 
                             // Salva no SharedPreferences
                             getSharedPreferences("user_data", MODE_PRIVATE)
@@ -96,9 +92,17 @@ public class LoginActivity extends AppCompatActivity {
 
                             Toast.makeText(LoginActivity.this, "Login bem-sucedido!", Toast.LENGTH_SHORT).show();
 
-                            // Redireciona para ListaVideosActivity
-                            Intent intent = new Intent(LoginActivity.this, ListaVideosActivity.class);
-                            startActivity(intent);
+                            // Redireciona de acordo com o tipo
+                            if (tipo.equalsIgnoreCase("admin")) {
+                                Intent intent = new Intent(LoginActivity.this, ListaVideosActivity.class);
+                                intent.putExtra("tipo", "admin");
+                                startActivity(intent);
+                            } else {
+                                Intent intent = new Intent(LoginActivity.this, ListaVideosActivity.class);
+                                intent.putExtra("tipo", tipo);
+                                startActivity(intent);
+                            }
+
                             finish(); // Fecha a tela de login
 
                         } else {
@@ -113,4 +117,3 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 }
-

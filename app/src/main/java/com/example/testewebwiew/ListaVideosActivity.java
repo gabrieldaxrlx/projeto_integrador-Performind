@@ -52,6 +52,7 @@ public class ListaVideosActivity extends AppCompatActivity implements VideoAdapt
         adapter = new VideoAdapter(videos, this, this);
         recyclerView.setAdapter(adapter);
 
+
         ImageButton btnUser = findViewById(R.id.btnUser);
         btnUser.setOnClickListener(v -> {
             Intent intent = new Intent(ListaVideosActivity.this, PerfilUsuario.class);
@@ -159,12 +160,14 @@ public class ListaVideosActivity extends AppCompatActivity implements VideoAdapt
 
     @SuppressLint("WrongConstant")
     private void showMenuLateral() {
+        // Criar o DrawerLayout programaticamente
         DrawerLayout drawerLayout = new DrawerLayout(this);
         drawerLayout.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
         drawerLayout.setFitsSystemWindows(true);
 
+        // Fundo escurecido
         View dimView = new View(this);
         dimView.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -172,8 +175,8 @@ public class ListaVideosActivity extends AppCompatActivity implements VideoAdapt
         dimView.setBackgroundColor(Color.parseColor("#80000000"));
         drawerLayout.addView(dimView);
 
+        // Infla o menu lateral
         View menuView = getLayoutInflater().inflate(R.layout.layout_menu_lateral, drawerLayout, false);
-
         int menuWidth = (int) (getScreenWidth() * 0.75);
         DrawerLayout.LayoutParams params = new DrawerLayout.LayoutParams(
                 menuWidth,
@@ -182,33 +185,10 @@ public class ListaVideosActivity extends AppCompatActivity implements VideoAdapt
         menuView.setLayoutParams(params);
         drawerLayout.addView(menuView);
 
-        // Botão 1: Cadastrar vídeo
-        Button btnCadastrarVideo = menuView.findViewById(R.id.btnCadastrarVideo);
-        btnCadastrarVideo.setOnClickListener(v -> {
-            Intent intent = new Intent(ListaVideosActivity.this, CadastroVideo.class);
-            startActivityForResult(intent, 1);
-            drawerLayout.closeDrawer(Gravity.LEFT);
-        });
+        // Fecha o menu ao clicar fora
+        dimView.setOnClickListener(v -> drawerLayout.closeDrawer(Gravity.START));
 
-        // Botão 2: Adicionar usuário
-        Button btnAdicionarUsuario = menuView.findViewById(R.id.btnAdicionarUsuario);
-        btnAdicionarUsuario.setOnClickListener(v -> {
-            Intent intent = new Intent(ListaVideosActivity.this, CriacaoDeConta.class);
-            startActivity(intent);
-            drawerLayout.closeDrawer(Gravity.LEFT);
-        });
-
-        // Botão 5: Sair
-        Button btnSair = menuView.findViewById(R.id.btnSair);
-        btnSair.setOnClickListener(v -> {
-            // Exemplo: encerrar a sessão
-            finishAffinity(); // fecha todas as atividades
-        });
-
-        dimView.setOnClickListener(v -> {
-            drawerLayout.closeDrawer(Gravity.START);
-        });
-
+        // Lidar com o evento de fechar o Drawer
         drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
             public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
@@ -216,7 +196,8 @@ public class ListaVideosActivity extends AppCompatActivity implements VideoAdapt
             }
 
             @Override
-            public void onDrawerOpened(@NonNull View drawerView) {}
+            public void onDrawerOpened(@NonNull View drawerView) {
+            }
 
             @Override
             public void onDrawerClosed(@NonNull View drawerView) {
@@ -225,15 +206,41 @@ public class ListaVideosActivity extends AppCompatActivity implements VideoAdapt
             }
 
             @Override
-            public void onDrawerStateChanged(int newState) {}
+            public void onDrawerStateChanged(int newState) {
+            }
         });
 
+        // Ações dos botões do menu lateral
+        Button btnCadastrarVideo = menuView.findViewById(R.id.btnCadastrarVideo);
+        Button btnAdicionarUsuario = menuView.findViewById(R.id.btnAdicionarUsuario);
+        Button btnExcluirUsuario = menuView.findViewById(R.id.btnExcluirUsuario);
+        Button btnSair = menuView.findViewById(R.id.btnSair);
+
+        btnCadastrarVideo.setOnClickListener(v -> {
+            drawerLayout.closeDrawer(Gravity.START);
+            startActivity(new Intent(this, CadastroVideo.class));
+        });
+
+        btnAdicionarUsuario.setOnClickListener(v -> {
+            drawerLayout.closeDrawer(Gravity.START);
+            startActivity(new Intent(this, CriacaoDeConta.class));
+        });
+
+        btnExcluirUsuario.setOnClickListener(v -> {
+            drawerLayout.closeDrawer(Gravity.START);
+            startActivity(new Intent(this, Excluir_usuario.class));
+        });
+
+        btnSair.setOnClickListener(v -> {
+            drawerLayout.closeDrawer(Gravity.START);
+            finish(); // ou logout, limpar sessão etc.
+        });
+
+        // Adiciona o DrawerLayout à view raiz e abre o menu
         ViewGroup rootView = (ViewGroup) getWindow().getDecorView().getRootView();
         rootView.addView(drawerLayout);
-
         drawerLayout.openDrawer(Gravity.START);
     }
-
 
     private int getScreenWidth() {
         DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -241,3 +248,4 @@ public class ListaVideosActivity extends AppCompatActivity implements VideoAdapt
         return displayMetrics.widthPixels;
     }
 }
+
