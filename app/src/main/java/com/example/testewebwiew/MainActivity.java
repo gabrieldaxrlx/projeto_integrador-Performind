@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     private OkHttpClient client = new OkHttpClient();
+    private String currentVideoId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,10 +52,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String getVideoIdToDelete() {
-
-        return "20";
+        currentVideoId = getIntent().getStringExtra("videoId");
+        if (currentVideoId == null) {
+            currentVideoId = ""; // ID padrão
+        }
+        return currentVideoId;
     }
-
     private void excluirVideoDoBanco(String videoDbId) {
         String url = "https://czflkjinwqeokpxesucd.supabase.co/rest/v1/videos?id=eq." + videoDbId;
 
