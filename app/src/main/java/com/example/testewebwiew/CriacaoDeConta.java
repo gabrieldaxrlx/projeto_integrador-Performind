@@ -28,6 +28,9 @@ public class CriacaoDeConta extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_criacao_de_conta);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setStatusBarColor(getResources().getColor(R.color.blue_500));
+        }
 
         editNome = findViewById(R.id.editNome);
         editMatricula = findViewById(R.id.editMatricula);
@@ -36,7 +39,7 @@ public class CriacaoDeConta extends AppCompatActivity {
         spinnerTipoUsuario = findViewById(R.id.spinnerTipoUsuario);
         btnCadastrar = findViewById(R.id.btnCadastrar);
 
-        String[] tipos = {"admin", "funcionario", "lider"};
+        String[] tipos = {"admin", "funcionario"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, tipos);
         spinnerTipoUsuario.setAdapter(adapter);
 
@@ -60,16 +63,55 @@ public class CriacaoDeConta extends AppCompatActivity {
             return;
         }
 
-        salvarUsuarioNoBanco(nome, matricula, senha, tipoUsuario);
+        verificarMatriculaExistente(nome, matricula, senha, tipoUsuario);
+    }
+
+    private void verificarMatriculaExistente(String nome, String matricula, String senha, String tipoUsuario) {
+        HttpUrl url = HttpUrl.parse(SUPABASE_URL + "/rest/v1/usuarios")
+                .newBuilder()
+                .addQueryParameter("matricula", "eq." + matricula)
+                .build();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .get()
+                .addHeader("apikey", SUPABASE_API_KEY)
+                .addHeader("Authorization", "Bearer " + SUPABASE_API_KEY)
+                .addHeader("Accept", "application/json")
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                runOnUiThread(() ->
+                        Toast.makeText(CriacaoDeConta.this, "Erro ao verificar matrícula", Toast.LENGTH_SHORT).show());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String json = response.body().string();
+                runOnUiThread(() -> {
+                    if (response.isSuccessful()) {
+                        if (json.equals("[]")) {
+                            salvarUsuarioNoBanco(nome, matricula, senha, tipoUsuario);
+                        } else {
+                            Toast.makeText(CriacaoDeConta.this, "Matrícula já está em uso!", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(CriacaoDeConta.this, "Erro ao consultar matrícula", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
     }
 
     private void salvarUsuarioNoBanco(String nome, String matricula, String senha, String tipoUsuario) {
         try {
             JSONObject json = new JSONObject();
-            json.put("nome", nome); // campo real no Supabase
+            json.put("nome", nome);
             json.put("matricula", matricula);
             json.put("senha", senha);
-            json.put("tipo", tipoUsuario); // campo real no Supabase
+            json.put("tipo", tipoUsuario);
 
             RequestBody body = RequestBody.create(json.toString(), JSON);
 
@@ -90,18 +132,15 @@ public class CriacaoDeConta extends AppCompatActivity {
                 }
 
                 @Override
-                public void onResponse(Call call, Response response) throws IOException {
+                public void onResponse(Call call, Response response) {
                     runOnUiThread(() -> {
                         if (response.isSuccessful()) {
                             Toast.makeText(CriacaoDeConta.this, "Usuário cadastrado com sucesso!", Toast.LENGTH_LONG).show();
-
-                            // Vai para ListaVideosActivity após cadastro
                             Intent intent = new Intent(CriacaoDeConta.this, ListaVideosActivity.class);
                             startActivity(intent);
-                            finish(); // Fecha a tela de cadastro
-
+                            finish();
                         } else {
-                            Toast.makeText(CriacaoDeConta.this, "Erro ao salvar (verifique se a matrícula já existe)", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(CriacaoDeConta.this, "Erro ao salvar (verifique os dados)", Toast.LENGTH_SHORT).show();
                         }
                     });
                 }

@@ -6,12 +6,40 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:icon="@drawable/ic_logo"
+        android:label="Performind"
+        android:roundIcon="@drawable/ic_logo"
         android:supportsRtl="true"
         android:theme="@style/Theme.TesteWebwiew"
         tools:targetApi="31">
+
+        <activity android:name=".ResponderEnqueteActivity" android:exported="false" />
+        <activity android:name=".ListaEnquetesActivity" android:exported="false" />
+
+        <activity
+            android:name=".ListaEnquetesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CriacaoDeEnqueteActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Enquete_resp"
+            android:exported="false" />
+        <activity
+            android:name=".EnqueteActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MudarSenhaActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ExclusaoDeUsuarioActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ListaExcluirVideoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ExcluirVideo"
+            android:exported="false" />
         <activity
             android:name=".Excluir_usuario"
             android:exported="false" />

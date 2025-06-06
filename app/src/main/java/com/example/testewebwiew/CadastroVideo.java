@@ -29,6 +29,9 @@ public class CadastroVideo extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cadastro_video);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setStatusBarColor(getResources().getColor(R.color.blue_500));
+        }
 
         editUrl = findViewById(R.id.URLVideo);
         editTitulo = findViewById(R.id.TituloVideo);

@@ -1,112 +1,80 @@
 package com.example.testewebwiew;
 
-import static android.content.ContentValues.TAG;
-import static android.content.Intent.getIntent;
-
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer;
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener;
-import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.YouTubePlayerListener;
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions;
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.utils.YouTubePlayerUtils;
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView;
 
-import java.io.IOException;
-
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity";
-    private OkHttpClient client = new OkHttpClient();
-    private String currentVideoId;
+    private static final String SUPABASE_URL = "https://czflkjinwqeokpxesucd.supabase.co";
+    private static final String API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6Zmxramlud3Flb2tweGVzdWNkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0Nzk1Mjk3NiwiZXhwIjoyMDYzNTI4OTc2fQ.n4bNzO29sqfmHf7-FXHpX_5e6QCRMNL8JV5hitPAM8E";
 
+    private final OkHttpClient client = new OkHttpClient();
     private PlayerUiController playerUiController;
+    private YouTubePlayerView youTubePlayerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        YouTubePlayerView youTubePlayerView = findViewById(R.id.youtubePlayerr);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setStatusBarColor(getResources().getColor(R.color.blue_500));
+        }
+
+        youTubePlayerView = findViewById(R.id.youtubePlayerr);
         getLifecycle().addObserver(youTubePlayerView);
         youTubePlayerView.setEnableAutomaticInitialization(false);
 
-        View controlsUi = youTubePlayerView.inflateCustomPlayerUi(R.layout.custom_controls);
+        // Recebe o valor via Intent (videoUrl ou videoId)
+        String videoUrl = getIntent().getStringExtra("videoUrl");
+        String videoId = null;
 
-        String videoId = getIntent().getStringExtra("videoId");
-        if (videoId == null) {
-            videoId = "N6NJUYTmCYQ"; // ID padrão
+        if (videoUrl != null && !videoUrl.isEmpty()) {
+            videoId = extrairIdDoYoutube(videoUrl);
+        } else {
+            // fallback: tentar pelo campo "videoId"
+            videoId = getIntent().getStringExtra("videoId");
         }
 
+        if (videoId == null || videoId.isEmpty()) {
+            videoId = "N6NJUYTmCYQ"; // fallback fixo
+        }
+
+        // Layout de controle personalizado
+        View controlsUi = youTubePlayerView.inflateCustomPlayerUi(R.layout.custom_controls);
+
         String finalVideoId = videoId;
-        YouTubePlayerListener youTubePlayerListener = new AbstractYouTubePlayerListener() {
+        youTubePlayerView.initialize(new AbstractYouTubePlayerListener() {
             @Override
             public void onReady(@NonNull YouTubePlayer youTubePlayer) {
                 playerUiController = new PlayerUiController(controlsUi, youTubePlayerView, youTubePlayer);
                 youTubePlayer.addListener(playerUiController);
-                YouTubePlayerUtils.loadOrCueVideo(youTubePlayer, getLifecycle(), finalVideoId, 0F);
+                YouTubePlayerUtils.loadOrCueVideo(youTubePlayer, getLifecycle(), finalVideoId, 0f);
             }
-        };
-
-        IFramePlayerOptions options = new IFramePlayerOptions.Builder().controls(0).build();
-        youTubePlayerView.initialize(youTubePlayerListener, options);
-
-        // Poll functionality
-        RadioGroup pollGroup = findViewById(R.id.pollGroup);
-        Button pollSubmit = findViewById(R.id.pollSubmit);
-        pollSubmit.setOnClickListener(v -> {
-            int selectedId = pollGroup.getCheckedRadioButtonId();
-            if (selectedId == -1) {
-                Toast.makeText(MainActivity.this, "Selecione uma opção", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            RadioButton selectedRadioButton = findViewById(selectedId);
-            String vote = selectedRadioButton.getText().toString();
-            Toast.makeText(MainActivity.this, "Você votou: " + vote, Toast.LENGTH_SHORT).show();
-            // Here you would typically send the vote to a server
-        });
-
-        // Comments functionality
-        EditText commentInput = findViewById(R.id.commentInput);
-        Button commentSubmit = findViewById(R.id.commentSubmit);
-        LinearLayout commentsContainer = findViewById(R.id.commentsContainer);
-
-        commentSubmit.setOnClickListener(v -> {
-            String comment = commentInput.getText().toString().trim();
-            if (comment.isEmpty()) {
-                Toast.makeText(this, "Digite um comentário", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            // Add comment to the UI
-            TextView commentView = new TextView(this);
-            commentView.setText(comment);
-            commentView.setPadding(0, 8, 0, 8);
-            commentsContainer.addView(commentView);
-
-            commentInput.setText("");
-            Toast.makeText(this, "Comentário adicionado", Toast.LENGTH_SHORT).show();
-
-        });
+        }, new IFramePlayerOptions.Builder().controls(0).build());
+    }
+    private String extrairIdDoYoutube(String url) {
+        if (url.contains("youtu.be/")) {
+            return url.substring(url.lastIndexOf("/") + 1);
+        } else if (url.contains("v=")) {
+            String[] parts = url.split("v=");
+            String idPart = parts[1];
+            int ampIndex = idPart.indexOf("&");
+            return ampIndex != -1 ? idPart.substring(0, ampIndex) : idPart;
+        }
+        return null;
     }
 }

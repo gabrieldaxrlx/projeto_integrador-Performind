@@ -5,37 +5,26 @@
     android:orientation="vertical"
     android:background="@android:color/white">
 
-    <!-- Cabeçalho do menu -->
+    <!-- Cabeçalho com logo e fundo azul -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="180dp"
         android:orientation="vertical"
         android:gravity="center"
-        android:background="?attr/colorPrimary">
+        android:background="@color/blue_500">
 
         <ImageView
-            android:id="@+id/imgMenuPerfil"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:src="@drawable/ic_more_vert"
-            android:background="@drawable/circle_background"
-            android:contentDescription="Imagem do usuário" />
-
-        <TextView
-            android:id="@+id/txtMenuNome"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Nome do Usuário"
-            android:textColor="@android:color/white"
-            android:textSize="16sp"
-            android:textAlignment="center"
-            android:layout_marginTop="8dp" />
+            android:src="@drawable/ic_logo"
+            android:contentDescription="Logo" />
     </LinearLayout>
 
-    <!-- Opções do menu -->
+    <!-- Área dos botões -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:orientation="vertical"
         android:padding="16dp">
 
@@ -45,7 +34,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
+            android:textColor="@color/blue_500"
             android:text="Cadastrar novo vídeo"
+            android:textAllCaps="false"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/btnCriarEnquete"
+            style="?attr/borderlessButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:textColor="@color/blue_500"
+            android:text="Criar Enquete"
             android:textAllCaps="false"
             android:textSize="14sp" />
 
@@ -55,6 +56,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
+            android:textColor="@color/blue_500"
             android:text="Adicionar usuário"
             android:textAllCaps="false"
             android:textSize="14sp" />
@@ -65,18 +67,31 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
+            android:textColor="@color/blue_500"
             android:text="Excluir usuário"
             android:textAllCaps="false"
             android:textSize="14sp" />
 
+        <Button
+            android:id="@+id/btnExcluirVideo"
+            style="?attr/borderlessButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:textColor="@color/blue_500"
+            android:text="Excluir vídeo"
+            android:textAllCaps="false"
+            android:textSize="14sp" />
 
         <Button
             android:id="@+id/btnSair"
             style="?attr/borderlessButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/blue_500"
             android:text="Sair"
             android:textAllCaps="false"
             android:textSize="14sp" />
     </LinearLayout>
+
 </LinearLayout>

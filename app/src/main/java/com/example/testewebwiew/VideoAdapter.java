@@ -6,9 +6,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.Glide;
+
 import java.util.List;
 
 public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHolder> {
@@ -25,6 +28,11 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         this.videos = videos;
         this.listener = listener;
         this.context = context;
+    }
+
+    // **Método para atualizar a lista de vídeos no adapter**
+    public void setVideos(List<ItemVideo> novaLista) {
+        this.videos = novaLista;
     }
 
     @NonNull
@@ -66,19 +74,17 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         public void bind(ItemVideo video) {
             txtTitulo.setText(video.getTitle());
 
-            // Carrega a thumbnail usando Glide
             String videoId = extractYouTubeId(video.getUrl());
             String thumbnailUrl = "https://img.youtube.com/vi/" + videoId + "/hqdefault.jpg";
 
             Glide.with(context)
                     .load(thumbnailUrl)
-                    .placeholder(R.drawable.placeholder) // Adicione um placeholder no seu drawable
-                    .error(R.drawable.error) // Adicione uma imagem de erro no seu drawable
+                    .placeholder(R.drawable.placeholder)
+                    .error(R.drawable.error)
                     .into(imgThumbnail);
         }
 
         private String extractYouTubeId(String url) {
-            // Extrai o ID do vídeo da URL do YouTube
             String videoId = "";
             if (url != null && url.trim().length() > 0) {
                 if (url.contains("youtu.be/")) {

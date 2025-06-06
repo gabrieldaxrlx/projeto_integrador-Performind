@@ -3,16 +3,17 @@ package com.example.testewebwiew;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.PopupWindow;
+import android.widget.SearchView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -20,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -36,15 +38,28 @@ public class ListaVideosActivity extends AppCompatActivity implements VideoAdapt
     private VideoAdapter adapter;
     private List<ItemVideo> videos = new ArrayList<>();
 
+    private SwipeRefreshLayout swipeRefreshLayout;
+
     private final OkHttpClient client = new OkHttpClient();
+
+    private GestureDetector gestureDetector;  // Detector de gestos para swipe
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lista_videos);
-
-        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setStatusBarColor(getResources().getColor(R.color.blue_500));
+        }
+        ImageButton btnMenu = findViewById(R.id.btnMenu);
+        String tipo = getSharedPreferences("user_data", MODE_PRIVATE)
+                .getString("tipo", "funcionario");
+        if ("usuario".equalsIgnoreCase(tipo) || "admin".equalsIgnoreCase(tipo)) {
+            btnMenu.setVisibility(View.VISIBLE);
+        } else {
+            btnMenu.setVisibility(View.GONE);
+        }
+        btnMenu.setOnClickListener(v -> showMenuLateral());
 
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -52,31 +67,61 @@ public class ListaVideosActivity extends AppCompatActivity implements VideoAdapt
         adapter = new VideoAdapter(videos, this, this);
         recyclerView.setAdapter(adapter);
 
+        swipeRefreshLayout = findViewById(R.id.swipeRefresh);
+
+        // Inicializa GestureDetector para detectar swipe
+        gestureDetector = new GestureDetector(this, new GestureListener());
+
+        // Usa SimpleOnItemTouchListener para captar gestos no RecyclerView
+        recyclerView.addOnItemTouchListener(new RecyclerView.SimpleOnItemTouchListener() {
+            @Override
+            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+                boolean handled = gestureDetector.onTouchEvent(e);
+                return handled;  // se true, intercepta o evento
+            }
+        });
+
+        swipeRefreshLayout.setOnRefreshListener(() -> carregarVideosDoBanco());
+
         ImageButton btnUser = findViewById(R.id.btnUser);
         btnUser.setOnClickListener(v -> {
             Intent intent = new Intent(ListaVideosActivity.this, PerfilUsuario.class);
             startActivity(intent);
         });
 
-        ImageButton btnNotificacao = findViewById(R.id.btnNotificacao);
-        btnNotificacao.setOnClickListener(v -> {
-            showNotificacoes();
+        SearchView searchView = findViewById(R.id.searchView);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                filtrarVideos(query);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                filtrarVideos(newText);
+                return true;
+            }
         });
 
-        ImageButton btnMenu = findViewById(R.id.btnMenu);
-        btnMenu.setOnClickListener(v -> {
-            showMenuLateral();
-        });
+        carregarVideosDoBanco();
+    }
 
-        carregarVideosDoBanco(); // 🔽 CARREGA OS VÍDEOS AO INICIAR
+    @Override
+    protected void onResume() {
+        super.onResume();
+        atualizarActivity();
+    }
+
+    public void atualizarActivity() {
+        carregarVideosDoBanco();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         if (requestCode == 1 && resultCode == RESULT_OK) {
-            carregarVideosDoBanco(); // 🔽 RECARREGA DEPOIS DE ADICIONAR VÍDEO
+            atualizarActivity();
         }
     }
 
@@ -87,7 +132,6 @@ public class ListaVideosActivity extends AppCompatActivity implements VideoAdapt
         startActivity(intent);
     }
 
-    // 🔽 MÉTODO QUE CONSULTA O SUPABASE E ATUALIZA A LISTA
     private void carregarVideosDoBanco() {
         String url = "https://czflkjinwqeokpxesucd.supabase.co/rest/v1/videos?select=*";
 
@@ -100,7 +144,10 @@ public class ListaVideosActivity extends AppCompatActivity implements VideoAdapt
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                runOnUiThread(() -> Toast.makeText(ListaVideosActivity.this, "Erro ao carregar vídeos", Toast.LENGTH_SHORT).show());
+                runOnUiThread(() -> {
+                    Toast.makeText(ListaVideosActivity.this, "Erro ao carregar vídeos", Toast.LENGTH_SHORT).show();
+                    swipeRefreshLayout.setRefreshing(false);
+                });
             }
 
             @Override
@@ -117,56 +164,43 @@ public class ListaVideosActivity extends AppCompatActivity implements VideoAdapt
                                 String titulo = obj.getString("titulo");
                                 videos.add(new ItemVideo(url, titulo));
                             }
+                            adapter.setVideos(videos);
                             adapter.notifyDataSetChanged();
                         } catch (Exception e) {
                             Toast.makeText(ListaVideosActivity.this, "Erro ao processar dados", Toast.LENGTH_SHORT).show();
+                        } finally {
+                            swipeRefreshLayout.setRefreshing(false);
                         }
                     });
                 } else {
-                    runOnUiThread(() -> Toast.makeText(ListaVideosActivity.this, "Erro ao buscar vídeos", Toast.LENGTH_SHORT).show());
+                    runOnUiThread(() -> {
+                        Toast.makeText(ListaVideosActivity.this, "Erro ao buscar vídeos", Toast.LENGTH_SHORT).show();
+                        swipeRefreshLayout.setRefreshing(false);
+                    });
                 }
             }
         });
     }
 
-    private void showNotificacoes() {
-        View popupView = getLayoutInflater().inflate(R.layout.layout_notificacoes, null);
-        RecyclerView rvNotificacoes = popupView.findViewById(R.id.rvNotificacoes);
-        rvNotificacoes.setLayoutManager(new LinearLayoutManager(this));
-
-        PopupWindow popupWindow = new PopupWindow(
-                popupView,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                true
-        );
-
-        popupWindow.setElevation(10);
-        popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        popupWindow.setOutsideTouchable(true);
-
-        ImageButton btnNotificacao = findViewById(R.id.btnNotificacao);
-        popupWindow.showAsDropDown(btnNotificacao, 0, 0, Gravity.END);
-
-        popupView.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
-                popupWindow.dismiss();
-                return true;
+    private void filtrarVideos(String texto) {
+        List<ItemVideo> videosFiltrados = new ArrayList<>();
+        for (ItemVideo video : videos) {
+            if (video.getTitulo().toLowerCase().contains(texto.toLowerCase())) {
+                videosFiltrados.add(video);
             }
-            return false;
-        });
+        }
+        adapter.setVideos(videosFiltrados);
+        adapter.notifyDataSetChanged();
     }
 
     @SuppressLint("WrongConstant")
     private void showMenuLateral() {
-        // Criar o DrawerLayout programaticamente
         DrawerLayout drawerLayout = new DrawerLayout(this);
         drawerLayout.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
         drawerLayout.setFitsSystemWindows(true);
 
-        // Fundo escurecido
         View dimView = new View(this);
         dimView.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -174,7 +208,6 @@ public class ListaVideosActivity extends AppCompatActivity implements VideoAdapt
         dimView.setBackgroundColor(Color.parseColor("#80000000"));
         drawerLayout.addView(dimView);
 
-        // Infla o menu lateral
         View menuView = getLayoutInflater().inflate(R.layout.layout_menu_lateral, drawerLayout, false);
         int menuWidth = (int) (getScreenWidth() * 0.75);
         DrawerLayout.LayoutParams params = new DrawerLayout.LayoutParams(
@@ -184,10 +217,8 @@ public class ListaVideosActivity extends AppCompatActivity implements VideoAdapt
         menuView.setLayoutParams(params);
         drawerLayout.addView(menuView);
 
-        // Fecha o menu ao clicar fora
         dimView.setOnClickListener(v -> drawerLayout.closeDrawer(Gravity.START));
 
-        // Lidar com o evento de fechar o Drawer
         drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
             public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
@@ -195,8 +226,7 @@ public class ListaVideosActivity extends AppCompatActivity implements VideoAdapt
             }
 
             @Override
-            public void onDrawerOpened(@NonNull View drawerView) {
-            }
+            public void onDrawerOpened(@NonNull View drawerView) {}
 
             @Override
             public void onDrawerClosed(@NonNull View drawerView) {
@@ -205,44 +235,86 @@ public class ListaVideosActivity extends AppCompatActivity implements VideoAdapt
             }
 
             @Override
-            public void onDrawerStateChanged(int newState) {
-            }
+            public void onDrawerStateChanged(int newState) {}
         });
 
-        // Ações dos botões do menu lateral
         Button btnCadastrarVideo = menuView.findViewById(R.id.btnCadastrarVideo);
         Button btnAdicionarUsuario = menuView.findViewById(R.id.btnAdicionarUsuario);
         Button btnExcluirUsuario = menuView.findViewById(R.id.btnExcluirUsuario);
+        Button btnCriarEnquete = menuView.findViewById(R.id.btnCriarEnquete);
+        Button btnExcluirVideo = menuView.findViewById(R.id.btnExcluirVideo);
         Button btnSair = menuView.findViewById(R.id.btnSair);
 
         btnCadastrarVideo.setOnClickListener(v -> {
             drawerLayout.closeDrawer(Gravity.START);
-            startActivity(new Intent(this, CadastroVideo.class));
+            Intent intent = new Intent(ListaVideosActivity.this, CadastroVideo.class);
+            startActivity(intent);
         });
 
         btnAdicionarUsuario.setOnClickListener(v -> {
             drawerLayout.closeDrawer(Gravity.START);
-            startActivity(new Intent(this, CriacaoDeConta.class));
+            Intent intent = new Intent(ListaVideosActivity.this, CriacaoDeConta.class);
+            startActivity(intent);
         });
 
         btnExcluirUsuario.setOnClickListener(v -> {
             drawerLayout.closeDrawer(Gravity.START);
-            startActivity(new Intent(this, Excluir_usuario.class));
+            Intent intent = new Intent(ListaVideosActivity.this, ExclusaoDeUsuarioActivity.class);
+            startActivity(intent);
+        });
+
+        btnCriarEnquete.setOnClickListener(v -> {
+            drawerLayout.closeDrawer(Gravity.START);
+            Intent intent = new Intent(ListaVideosActivity.this, CriacaoDeEnqueteActivity.class);
+            startActivity(intent);
+        });
+
+        btnExcluirVideo.setOnClickListener(v -> {
+            drawerLayout.closeDrawer(Gravity.START);
+            Intent intent = new Intent(ListaVideosActivity.this, ListaExcluirVideoActivity.class);
+            startActivity(intent);
         });
 
         btnSair.setOnClickListener(v -> {
             drawerLayout.closeDrawer(Gravity.START);
-            finish(); // ou logout, limpar sessão etc.
+            finishAffinity();
         });
 
-        // Adiciona o DrawerLayout à view raiz e abre o menu
+
         ViewGroup rootView = (ViewGroup) getWindow().getDecorView().getRootView();
         rootView.addView(drawerLayout);
         drawerLayout.openDrawer(Gravity.START);
     }
+
     private int getScreenWidth() {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         return displayMetrics.widthPixels;
+    }
+
+    // GestureListener para detectar swipe
+    private class GestureListener extends GestureDetector.SimpleOnGestureListener {
+        private static final int SWIPE_THRESHOLD = 100;
+        private static final int SWIPE_VELOCITY_THRESHOLD = 100;
+
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            if (e1 == null || e2 == null) return false;
+
+            float diffX = e2.getX() - e1.getX();
+            float diffY = e2.getY() - e1.getY();
+
+            if (Math.abs(diffX) > Math.abs(diffY)) {
+                if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                    if (diffX < 0) {
+                        // Swipe da direita para a esquerda
+                        Intent intent = new Intent(ListaVideosActivity.this, ListaEnquetesActivity.class);
+                        startActivity(intent);
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
     }
 }

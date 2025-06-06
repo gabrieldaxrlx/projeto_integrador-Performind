@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="24dp"
+    android:background="@color/white">
+
+    <!-- Campo Título da Enquete -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/layoutTituloEnquete"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Título da enquete"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editTitulo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:background="@drawable/edittext_rounded_bg"
+            android:textColor="@android:color/black"
+            android:textSize="16sp" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Campo Tema da Enquete -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/layoutTemaEnquete"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="Tema da enquete"
+        app:layout_constraintTop_toBottomOf="@id/layoutTituloEnquete"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editTema"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:background="@drawable/edittext_rounded_bg"
+            android:textColor="@android:color/black"
+            android:textSize="16sp" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Botão Criar Enquete -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCriarEnquete"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="24dp"
+        android:text="Criar Enquete"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+
+        android:textSize="16sp"
+        android:backgroundTint="@color/blue_500"
+        app:cornerRadius="12dp"
+        app:layout_constraintTop_toBottomOf="@id/layoutTemaEnquete"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
