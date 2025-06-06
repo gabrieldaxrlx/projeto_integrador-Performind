@@ -38,22 +38,19 @@ public class MainActivity extends AppCompatActivity {
         getLifecycle().addObserver(youTubePlayerView);
         youTubePlayerView.setEnableAutomaticInitialization(false);
 
-        // Recebe o valor via Intent (videoUrl ou videoId)
         String videoUrl = getIntent().getStringExtra("videoUrl");
         String videoId = null;
 
         if (videoUrl != null && !videoUrl.isEmpty()) {
             videoId = extrairIdDoYoutube(videoUrl);
         } else {
-            // fallback: tentar pelo campo "videoId"
             videoId = getIntent().getStringExtra("videoId");
         }
 
         if (videoId == null || videoId.isEmpty()) {
-            videoId = "N6NJUYTmCYQ"; // fallback fixo
+            videoId = "N6NJUYTmCYQ";
         }
 
-        // Layout de controle personalizado
         View controlsUi = youTubePlayerView.inflateCustomPlayerUi(R.layout.custom_controls);
 
         String finalVideoId = videoId;

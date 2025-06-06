@@ -42,7 +42,7 @@ public class ListaVideosActivity extends AppCompatActivity implements VideoAdapt
 
     private final OkHttpClient client = new OkHttpClient();
 
-    private GestureDetector gestureDetector;  // Detector de gestos para swipe
+    private GestureDetector gestureDetector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,10 +69,8 @@ public class ListaVideosActivity extends AppCompatActivity implements VideoAdapt
 
         swipeRefreshLayout = findViewById(R.id.swipeRefresh);
 
-        // Inicializa GestureDetector para detectar swipe
         gestureDetector = new GestureDetector(this, new GestureListener());
 
-        // Usa SimpleOnItemTouchListener para captar gestos no RecyclerView
         recyclerView.addOnItemTouchListener(new RecyclerView.SimpleOnItemTouchListener() {
             @Override
             public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {

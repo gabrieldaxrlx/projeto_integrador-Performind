@@ -56,17 +56,6 @@ public class ListaEnquetesActivity extends AppCompatActivity {
         });
         recyclerEnquetes.setAdapter(adapter);
 
-        // Se quiser botão manual, crie no layout com id diferente e faça o tratamento aqui:
-        /*
-        Button btnResponderManual = findViewById(R.id.btnResponderManual);
-        btnResponderManual.setOnClickListener(v -> {
-            Intent intent = new Intent(ListaEnquetesActivity.this, ResponderEnqueteActivity.class);
-            intent.putExtra("enquete_id", -1);
-            intent.putExtra("enquete_titulo", "Responder Enquete Manual");
-            startActivity(intent);
-        });
-        */
-
         carregarEnquetesDoBanco();
     }
 

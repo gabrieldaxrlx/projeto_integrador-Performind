@@ -29,8 +29,6 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         this.listener = listener;
         this.context = context;
     }
-
-    // **Método para atualizar a lista de vídeos no adapter**
     public void setVideos(List<ItemVideo> novaLista) {
         this.videos = novaLista;
     }
