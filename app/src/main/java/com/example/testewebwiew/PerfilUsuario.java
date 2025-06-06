@@ -12,6 +12,9 @@ public class PerfilUsuario extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_perfil_usuario);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setStatusBarColor(getResources().getColor(R.color.blue_500));
+        }
 
         TextView txtNome = findViewById(R.id.txtNome);
         TextView txtMatricula = findViewById(R.id.txtMatricula);
