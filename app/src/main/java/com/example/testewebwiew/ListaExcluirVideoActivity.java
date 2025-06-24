@@ -78,10 +78,10 @@ public class ListaExcluirVideoActivity extends AppCompatActivity {
 
                     } catch (Exception e) {
                         e.printStackTrace();
-                        runOnUiThread(() -> Toast.makeText(ListaExcluirVideoActivity.this, "Erro ao processar dados", Toast.LENGTH_SHORT).show());
+                        runOnUiThread(() -> Toast.makeText(ListaExcluirVideoActivity.this, "Erro ao processar dados ", Toast.LENGTH_SHORT).show());
                     }
                 } else {
-                    runOnUiThread(() -> Toast.makeText(ListaExcluirVideoActivity.this, "Erro ao buscar vídeos", Toast.LENGTH_SHORT).show());
+                    runOnUiThread(() -> Toast.makeText(ListaExcluirVideoActivity.this, "Erro ao buscar vídeos ", Toast.LENGTH_SHORT).show());
                 }
             }
         });
